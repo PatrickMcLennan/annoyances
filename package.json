@@ -1,0 +1,21 @@
+{
+  "name": "function-library",
+  "version": "1.0.0",
+  "description": "Some Functional programming helpers and definitions",
+  "main": "dist/index.js",
+  "types": "dist/index.d.js",
+  "scripts": {
+    "dev": "tsc -w",
+    "test": "jest --watchAll",
+    "test-report": "jest --coverage",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^26.4.2",
+    "ts-jest": "^26.2.0",
+    "typescript": "^4.0.2"
+  }
+}
