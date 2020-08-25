@@ -1,11 +1,11 @@
 {
-  "name": "function-library",
-  "version": "1.0.0",
+  "name": "annoyances",
+  "version": "1.0.1",
   "description": "Some Functional programming helpers and definitions",
   "main": "dist/index.js",
   "types": "dist/index.d.js",
   "scripts": {
-    "dev": "tsc -w",
+    "watch": "tsc -w",
     "test": "jest --watchAll",
     "test-report": "jest --coverage",
     "build": "tsc"

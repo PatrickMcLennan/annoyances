@@ -37,19 +37,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DateInfo = void 0;
 var DateInfo = /** @class */ (function () {
     function DateInfo(input) {
-        this.input = input ? new Date(input) : new Date();
+        if (input === void 0) { input = new Date(); }
+        this.input = new Date(input);
         this.error = new Date(input).toString().toLowerCase() === "invalid date";
         this.today = new Date();
         this.errorMessage = this.error
-            ? "DateInfo recieved \"" + (input === null || input === void 0 ? void 0 : input.toString()) + "\", and was unable to transform that into a date."
+            ? "DateInfo recieved \"" + input.toString() + "\", and was unable to transform that into a date."
             : "";
+        return new Proxy(this, {
+            get: function (target, prop) {
+                if (target.error)
+                    console.warn(target.errorMessage);
+                return function () {
+                    var args = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        args[_i] = arguments[_i];
+                    }
+                    return target[prop].apply(target, args);
+                };
+            },
+        });
     }
-    DateInfo.prototype.checkError = function (newMessage) {
-        if (this.error)
-            throw new Error(newMessage ? newMessage : this.errorMessage);
-        else
-            return function (value) { return value; };
-    };
     DateInfo.prototype.formatDate = function (date) {
         return [date.getFullYear(), date.getMonth(), date.getDate()].toString();
     };
@@ -60,20 +68,19 @@ var DateInfo = /** @class */ (function () {
      * Comparisons
      */
     DateInfo.prototype.dateIsToday = function () {
-        var sameDate = this.formatDate(this.input) === this.formatDate(this.today);
-        return this.checkError()(sameDate);
+        return this.formatDate(this.input) === this.formatDate(this.today);
     };
     DateInfo.prototype.dateIsPast = function () {
         var _a = [this.input, this.today].map(function (date) { return date.valueOf(); }), date = _a[0], today = _a[1];
-        return this.checkError()(date < today);
+        return date < today;
     };
     DateInfo.prototype.dateIsFuture = function () {
         var _a = [this.input, this.today].map(function (date) { return date.valueOf(); }), date = _a[0], today = _a[1];
-        return this.checkError()(date > today);
+        return date > today;
     };
     DateInfo.prototype.dateIsWithinRange = function (queriedDate, startDate, endDate) {
         var _a = [queriedDate, startDate, endDate].map(function (date) { return new Date(date).valueOf(); }), query = _a[0], start = _a[1], finish = _a[2];
-        return this.checkError()(query >= start && query <= finish);
+        return query >= start && query <= finish;
     };
     DateInfo.prototype.filterDuplicates = function (allDates) {
         var _this = this;
@@ -92,7 +99,7 @@ var DateInfo = /** @class */ (function () {
             var date = _a.date;
             return date;
         });
-        return this.checkError()(uniqueDates);
+        return uniqueDates;
     };
     /**
      * Generate Dates
