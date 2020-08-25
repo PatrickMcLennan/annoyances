@@ -1,11 +1,15 @@
 export declare class DateInfo {
-    input: Date;
+    date: Date;
     private error;
     private today;
     errorMessage: string;
     constructor(input?: Date | string);
+    /**
+     * Helpers
+     */
     private formatDate;
     private iterator;
+    private toggleError;
     /**
      * Comparisons
      */

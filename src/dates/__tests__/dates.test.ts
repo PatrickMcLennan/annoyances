@@ -8,7 +8,7 @@ const today: Date = new Date();
 const yesterday: Date = new Date(new Date().setDate(new Date().getDate() - 1));
 const tomorrow: Date = new Date(new Date().setDate(new Date().getDate() + 1));
 
-const errorLog = console.warn;
+const aWeekAgo = new Date(new Date().setDate(new Date().getDate() - 7));
 
 beforeEach(() => (console.warn = jest.fn()));
 
@@ -20,6 +20,7 @@ const ensureWarning = (message = errorMessage) => {
 test(`dateIsToday`, () => {
   expect(Today.dateIsToday()).toBe(true);
   expect(() => Today.dateIsToday()).not.toThrowError();
+  expect(console.warn).not.toHaveBeenCalled();
   ShouldThrow.dateIsToday();
   return ensureWarning();
 });
@@ -27,6 +28,7 @@ test(`dateIsToday`, () => {
 test(`dateIsPast`, () => {
   expect(new DateInfo(yesterday).dateIsPast()).toBe(true);
   expect(Today.dateIsPast()).toBe(false);
+  expect(console.warn).not.toHaveBeenCalled();
   ShouldThrow.dateIsPast();
   return ensureWarning();
 });
@@ -34,30 +36,28 @@ test(`dateIsPast`, () => {
 test(`dateIsFuture`, () => {
   expect(new DateInfo(tomorrow).dateIsFuture()).toBe(true);
   expect(Today.dateIsFuture()).toBe(false);
+  expect(console.warn).not.toHaveBeenCalled();
   ShouldThrow.dateIsFuture();
   return ensureWarning();
 });
 
 test(`dateIsWithinRange`, () => {
-  console.log(tomorrow.valueOf() > today.valueOf());
-  console.log(yesterday.valueOf() < today.valueOf());
   expect(Today.dateIsWithinRange(today, yesterday, tomorrow)).toBe(true);
   expect(Today.dateIsWithinRange(yesterday, today, tomorrow)).toBe(false);
+  expect(console.warn).not.toHaveBeenCalled();
   ShouldThrow.dateIsWithinRange(today, yesterday, tomorrow);
   return ensureWarning();
 });
 
-// test(`filterDuplicates`, () => {
-//   expect(Today.filterDuplicates([today, tomorrow, yesterday]).toString()).toBe([today, tomorrow, yesterday].toString());
-//   expect(() => ShouldThrow.filterDuplicates([today, yesterday, tomorrow])).toThrowError(errorMessage);
-// });
+test(`filterDuplicates`, () => {
+  expect(Today.filterDuplicates([today, tomorrow, yesterday]).toString()).toBe([today, tomorrow, yesterday].toString());
+  expect(Today.filterDuplicates([today, tomorrow, yesterday, yesterday, tomorrow]).toString()).toBe(
+    [today, tomorrow, yesterday].toString()
+  );
+  ShouldThrow.filterDuplicates([today, tomorrow, yesterday]);
+  return ensureWarning();
+});
 
-// test(`dateIsWithinRange`, () => {
-//   expect(Today.dateIsWithinRange(today, yesterday, tomorrow)).toBe(true);
-//   expect(Today.dateIsWithinRange(new Date(yesterday.setDate(yesterday.getDate() - 1)), yesterday, today)).toBe(false);
-//   expect(() => ShouldThrow.dateIsWithinRange(today, yesterday, tomorrow)).toThrowError(errorMessage);
-// });
-
-// test(`filterDuplicates`, () => {
-//     expect(Today.)
-// })
+test(`generateRange`, () => {
+  expect(Today.generateRange(aWeekAgo, today)).toBe(2);
+});

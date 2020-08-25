@@ -1,11 +1,11 @@
 export class DateInfo {
-  public input: Date;
+  public date: Date;
   private error: boolean;
   private today: Date;
   public errorMessage: string;
 
   constructor(input: Date | string = new Date()) {
-    this.input = new Date(input);
+    this.date = new Date(input);
     this.error = new Date(input).toString().toLowerCase() === `invalid date`;
     this.today = new Date();
     this.errorMessage = this.error
@@ -19,27 +19,47 @@ export class DateInfo {
     });
   }
 
+  /**
+   * Helpers
+   */
+
   private formatDate(date: Date): string {
     return [date.getFullYear(), date.getMonth(), date.getDate()].toString();
   }
 
-  private *iterator() {}
+  private *iterator(start: Date, end: Date) {
+    let nextDate: Date = start;
+
+    if (start.valueOf() > end.valueOf())
+      return this.toggleError(`The start date given is greater than the end date, no Range can be created`);
+
+    while (this.formatDate(nextDate) !== this.formatDate(end)) {
+      nextDate = new Date(nextDate.setDate(nextDate.getDate() + 1));
+      yield nextDate;
+    }
+    return;
+  }
+
+  private toggleError(message: string) {
+    this.error = true;
+    this.errorMessage = message;
+  }
 
   /**
    * Comparisons
    */
 
   public dateIsToday(): boolean {
-    return this.formatDate(this.input) === this.formatDate(this.today);
+    return this.formatDate(this.date) === this.formatDate(this.today);
   }
 
   public dateIsPast(): boolean {
-    const [date, today]: number[] = [this.input, this.today].map((date) => date.valueOf());
+    const [date, today]: number[] = [this.date, this.today].map((date) => date.valueOf());
     return date < today;
   }
 
   public dateIsFuture() {
-    const [date, today]: number[] = [this.input, this.today].map((date) => date.valueOf());
+    const [date, today]: number[] = [this.date, this.today].map((date) => date.valueOf());
     return date > today;
   }
 
@@ -65,5 +85,23 @@ export class DateInfo {
    * Generate Dates
    */
 
-  public generateRange(startDate: Date, endDate: Date) {}
+  public generateRange(startDate: Date, endDate: Date) {
+    const iterator: Generator = this.iterator(startDate, endDate);
+    let dates: Date[] = [startDate];
+
+    while (!iterator.next().done) {
+      dates.push(iterator.next().value);
+    }
+
+    console.log(dates);
+    // let range = iterator.next();
+
+    // console.log(range);
+
+    // while (!range.done) {
+    //   console.log(range.value.nextDate);
+    //   dates.push(range.value.nextDate);
+    //   range = iterator.next();
+    // }
+  }
 }

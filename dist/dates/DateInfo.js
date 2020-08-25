@@ -38,7 +38,7 @@ exports.DateInfo = void 0;
 var DateInfo = /** @class */ (function () {
     function DateInfo(input) {
         if (input === void 0) { input = new Date(); }
-        this.input = new Date(input);
+        this.date = new Date(input);
         this.error = new Date(input).toString().toLowerCase() === "invalid date";
         this.today = new Date();
         this.errorMessage = this.error
@@ -58,24 +58,48 @@ var DateInfo = /** @class */ (function () {
             },
         });
     }
+    /**
+     * Helpers
+     */
     DateInfo.prototype.formatDate = function (date) {
         return [date.getFullYear(), date.getMonth(), date.getDate()].toString();
     };
-    DateInfo.prototype.iterator = function () { return __generator(this, function (_a) {
-        return [2 /*return*/];
-    }); };
+    DateInfo.prototype.iterator = function (start, end) {
+        var nextDate;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    nextDate = start;
+                    if (start.valueOf() > end.valueOf())
+                        return [2 /*return*/, this.toggleError("The start date given is greater than the end date, no Range can be created")];
+                    _a.label = 1;
+                case 1:
+                    if (!(this.formatDate(nextDate) !== this.formatDate(end))) return [3 /*break*/, 3];
+                    nextDate = new Date(nextDate.setDate(nextDate.getDate() + 1));
+                    return [4 /*yield*/, nextDate];
+                case 2:
+                    _a.sent();
+                    return [3 /*break*/, 1];
+                case 3: return [2 /*return*/];
+            }
+        });
+    };
+    DateInfo.prototype.toggleError = function (message) {
+        this.error = true;
+        this.errorMessage = message;
+    };
     /**
      * Comparisons
      */
     DateInfo.prototype.dateIsToday = function () {
-        return this.formatDate(this.input) === this.formatDate(this.today);
+        return this.formatDate(this.date) === this.formatDate(this.today);
     };
     DateInfo.prototype.dateIsPast = function () {
-        var _a = [this.input, this.today].map(function (date) { return date.valueOf(); }), date = _a[0], today = _a[1];
+        var _a = [this.date, this.today].map(function (date) { return date.valueOf(); }), date = _a[0], today = _a[1];
         return date < today;
     };
     DateInfo.prototype.dateIsFuture = function () {
-        var _a = [this.input, this.today].map(function (date) { return date.valueOf(); }), date = _a[0], today = _a[1];
+        var _a = [this.date, this.today].map(function (date) { return date.valueOf(); }), date = _a[0], today = _a[1];
         return date > today;
     };
     DateInfo.prototype.dateIsWithinRange = function (queriedDate, startDate, endDate) {
@@ -104,7 +128,21 @@ var DateInfo = /** @class */ (function () {
     /**
      * Generate Dates
      */
-    DateInfo.prototype.generateRange = function (startDate, endDate) { };
+    DateInfo.prototype.generateRange = function (startDate, endDate) {
+        var iterator = this.iterator(startDate, endDate);
+        var dates = [startDate];
+        while (!iterator.next().done) {
+            dates.push(iterator.next().value);
+        }
+        console.log(dates);
+        // let range = iterator.next();
+        // console.log(range);
+        // while (!range.done) {
+        //   console.log(range.value.nextDate);
+        //   dates.push(range.value.nextDate);
+        //   range = iterator.next();
+        // }
+    };
     return DateInfo;
 }());
 exports.DateInfo = DateInfo;
