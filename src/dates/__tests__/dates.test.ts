@@ -9,28 +9,37 @@ const yesterday: Date = new Date(new Date().setDate(new Date().getDate() - 1));
 const tomorrow: Date = new Date(new Date().setDate(new Date().getDate() + 1));
 
 const aWeekAgo = new Date(new Date().setDate(new Date().getDate() - 7));
-
-beforeEach(() => (console.warn = jest.fn()));
+const correctWeek: string[] = [...Array(7).keys()]
+  .map((number) => {
+    const date: Date = new Date(new Date().setDate(new Date().getDate() - number));
+    return [date.getFullYear(), date.getMonth(), date.getDate()].toString();
+  })
+  .reverse();
 
 const ensureWarning = (message = errorMessage) => {
   expect(console.warn).toBeCalledWith(message);
   expect(console.warn).toBeCalledTimes(1);
 };
 
+beforeEach(() => (console.warn = jest.fn()));
+afterEach(() => ensureWarning());
+
+/**
+ * Comparisons
+ */
+
 test(`dateIsToday`, () => {
   expect(Today.dateIsToday()).toBe(true);
   expect(() => Today.dateIsToday()).not.toThrowError();
   expect(console.warn).not.toHaveBeenCalled();
   ShouldThrow.dateIsToday();
-  return ensureWarning();
 });
 
 test(`dateIsPast`, () => {
   expect(new DateInfo(yesterday).dateIsPast()).toBe(true);
-  expect(Today.dateIsPast()).toBe(false);
+  expect(new DateInfo(tomorrow).dateIsPast()).toBe(false);
   expect(console.warn).not.toHaveBeenCalled();
   ShouldThrow.dateIsPast();
-  return ensureWarning();
 });
 
 test(`dateIsFuture`, () => {
@@ -38,7 +47,6 @@ test(`dateIsFuture`, () => {
   expect(Today.dateIsFuture()).toBe(false);
   expect(console.warn).not.toHaveBeenCalled();
   ShouldThrow.dateIsFuture();
-  return ensureWarning();
 });
 
 test(`dateIsWithinRange`, () => {
@@ -46,7 +54,6 @@ test(`dateIsWithinRange`, () => {
   expect(Today.dateIsWithinRange(yesterday, today, tomorrow)).toBe(false);
   expect(console.warn).not.toHaveBeenCalled();
   ShouldThrow.dateIsWithinRange(today, yesterday, tomorrow);
-  return ensureWarning();
 });
 
 test(`filterDuplicates`, () => {
@@ -54,10 +61,33 @@ test(`filterDuplicates`, () => {
   expect(Today.filterDuplicates([today, tomorrow, yesterday, yesterday, tomorrow]).toString()).toBe(
     [today, tomorrow, yesterday].toString()
   );
+  expect(console.warn).not.toHaveBeenCalled();
   ShouldThrow.filterDuplicates([today, tomorrow, yesterday]);
-  return ensureWarning();
 });
 
+/**
+ * Generate Dates
+ */
+
 test(`generateRange`, () => {
-  expect(Today.generateRange(aWeekAgo, today)).toBe(2);
+  expect(
+    Today.generateRange(aWeekAgo, today).map((returnedDate) => {
+      const date: Date = new Date(returnedDate);
+      return [date.getFullYear(), date.getMonth(), date.getDate()].toString();
+    })
+  ).toStrictEqual(correctWeek);
+  expect(console.warn).not.toHaveBeenCalled();
+  ShouldThrow.generateRange(aWeekAgo, today);
+});
+
+test(`dayBefore`, () => {
+  expect(Today.dayBefore(today)).toStrictEqual(yesterday);
+  expect(console.warn).not.toHaveBeenCalled();
+  ShouldThrow.dayBefore(today);
+});
+
+test(`yesterday`, () => {
+  expect(Today.yesterday()).toStrictEqual(yesterday);
+  expect(console.warn).not.toHaveBeenCalled();
+  ShouldThrow.yesterday();
 });

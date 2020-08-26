@@ -8,7 +8,6 @@ export declare class DateInfo {
      * Helpers
      */
     private formatDate;
-    private iterator;
     private toggleError;
     /**
      * Comparisons
@@ -21,5 +20,7 @@ export declare class DateInfo {
     /**
      * Generate Dates
      */
-    generateRange(startDate: Date, endDate: Date): void;
+    generateRange(startDate: Date, endDate: Date): Date[];
+    dayBefore(date: Date): Date;
+    yesterday(): Date;
 }

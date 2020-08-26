@@ -27,19 +27,6 @@ export class DateInfo {
     return [date.getFullYear(), date.getMonth(), date.getDate()].toString();
   }
 
-  private *iterator(start: Date, end: Date) {
-    let nextDate: Date = start;
-
-    if (start.valueOf() > end.valueOf())
-      return this.toggleError(`The start date given is greater than the end date, no Range can be created`);
-
-    while (this.formatDate(nextDate) !== this.formatDate(end)) {
-      nextDate = new Date(nextDate.setDate(nextDate.getDate() + 1));
-      yield nextDate;
-    }
-    return;
-  }
-
   private toggleError(message: string) {
     this.error = true;
     this.errorMessage = message;
@@ -54,12 +41,12 @@ export class DateInfo {
   }
 
   public dateIsPast(): boolean {
-    const [date, today]: number[] = [this.date, this.today].map((date) => date.valueOf());
+    const [date, today]: number[] = [this.date.valueOf(), this.today.valueOf()];
     return date < today;
   }
 
   public dateIsFuture() {
-    const [date, today]: number[] = [this.date, this.today].map((date) => date.valueOf());
+    const [date, today]: number[] = [this.date.valueOf(), this.today.valueOf()];
     return date > today;
   }
 
@@ -69,16 +56,9 @@ export class DateInfo {
   }
 
   public filterDuplicates(allDates: Date[]): Date[] {
-    const uniqueDates: Date[] = allDates
-      .reduce((singles, current): { date: Date; string: string }[] => {
-        const formattedDate = {
-          date: current,
-          string: this.formatDate(current),
-        };
-        return singles.find(({ string }) => string === formattedDate.string) ? singles : [...singles, formattedDate];
-      }, [])
-      .map(({ date }) => date);
-    return uniqueDates;
+    const uniques: Map<string, Date> = new Map();
+    allDates.forEach((date) => uniques.set(this.formatDate(date), date));
+    return [...uniques.values()];
   }
 
   /**
@@ -86,22 +66,25 @@ export class DateInfo {
    */
 
   public generateRange(startDate: Date, endDate: Date) {
-    const iterator: Generator = this.iterator(startDate, endDate);
     let dates: Date[] = [startDate];
+    let nextDate = new Date(startDate.setDate(startDate.getDate() + 1));
+    const valid = startDate.valueOf() < endDate.valueOf();
 
-    while (!iterator.next().done) {
-      dates.push(iterator.next().value);
+    if (!valid)
+      this.toggleError(`generateRange recieved ${startDate} and ${endDate}, a range cannot be generated from these.`);
+
+    while (this.formatDate(nextDate) !== this.formatDate(endDate) && valid) {
+      dates.push(nextDate);
+      nextDate = new Date(nextDate.setDate(nextDate.getDate() + 1));
     }
+    return dates;
+  }
 
-    console.log(dates);
-    // let range = iterator.next();
+  public dayBefore(date: Date): Date {
+    return new Date(new Date(date).setDate(new Date(date).getDate() - 1));
+  }
 
-    // console.log(range);
-
-    // while (!range.done) {
-    //   console.log(range.value.nextDate);
-    //   dates.push(range.value.nextDate);
-    //   range = iterator.next();
-    // }
+  public yesterday(): Date {
+    return new Date(this.today.setDate(this.today.getDate() - 1));
   }
 }
